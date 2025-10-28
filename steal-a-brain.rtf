@@ -1,0 +1,316 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2761
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww40760\viewh19700\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 <!doctype html>\
+<html lang="en">\
+<head>\
+<meta charset="utf-8" />\
+<meta name="viewport" content="width=device-width,initial-scale=1" />\
+<title>Steal-a-Brain: Multiplication (up to 4\'d7)</title>\
+<style>\
+  :root\{ --bg:#0f1724; --card:#0b1220; --accent:#7dd3fc; --muted:#9aa6b2; --win:#34d399; \}\
+  body\{ font-family: Inter, system-ui, sans-serif; margin:0; min-height:100vh; background:linear-gradient(180deg,#071025 0%, #071827 60%); color:#e6eef6; display:flex; align-items:center; justify-content:center; padding:20px;\}\
+  .board\{width:920px; max-width:98vw; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.015)); border-radius:12px; padding:18px; box-shadow: 0 8px 30px rgba(2,6,23,0.6); \}\
+  header\{display:flex; gap:12px; align-items:center; justify-content:space-between\}\
+  h1\{font-size:20px; margin:0; letter-spacing:0.2px\}\
+  .controls\{display:flex; gap:8px; align-items:center\}\
+  label\{font-size:13px; color:var(--muted)\}\
+  select,input[type=number]\{background:transparent; border:1px solid rgba(255,255,255,0.06); color:var(--accent); padding:6px 8px; border-radius:8px\}\
+  .game\{display:flex; gap:18px; margin-top:14px\}\
+  .left\{flex:1; min-width:260px\}\
+  .right\{width:360px; background:rgba(255,255,255,0.02); border-radius:10px; padding:12px\}\
+  .question\{background:linear-gradient(90deg, rgba(125,211,252,0.06), rgba(125,211,252,0.02)); border-radius:10px; padding:18px; text-align:center; margin-bottom:12px\}\
+  .big\{font-size:44px; font-weight:700; color:var(--accent)\}\
+  .hint\{font-size:13px; color:var(--muted); margin-top:6px\}\
+  .answer-row\{display:flex; gap:8px; margin-top:12px; align-items:center; justify-content:center\}\
+  input.answer\{font-size:18px; padding:10px 12px; width:110px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); color:#0b1220\}\
+  button\{cursor:pointer; padding:10px 12px; border-radius:8px; border:0; background:var(--accent); color:#07233a; font-weight:600\}\
+  .players\{display:flex; gap:10px; flex-wrap:wrap\}\
+  .player\{flex:1; min-width:120px; background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; text-align:center; position:relative\}\
+  .player.active\{box-shadow:0 6px 20px rgba(125,211,252,0.08); border:1px solid rgba(125,211,252,0.12)\}\
+  .name\{font-size:15px; font-weight:700\}\
+  .score\{font-size:22px; margin-top:8px; color:var(--accent); font-weight:800;\}\
+  .badge\{position:absolute; top:8px; right:8px; background:#0b1220; color:var(--muted); font-size:12px; padding:4px 6px; border-radius:6px\}\
+  .log\{font-size:13px; color:var(--muted); max-height:220px; overflow:auto; padding:8px; background:rgba(10,14,20,0.2); border-radius:8px\}\
+  footer\{margin-top:14px; display:flex; gap:8px; justify-content:space-between; align-items:center\}\
+  .small\{font-size:13px; color:var(--muted)\}\
+  .win\{background:linear-gradient(90deg,#34d399,#60a5fa); color:#052018; padding:6px 10px; border-radius:8px; font-weight:700\}\
+  .steal-mode\{font-weight:700; color:#ffd166\}\
+  @media (max-width:720px)\{ .game\{flex-direction:column\} .right\{width:100%\} \}\
+</style>\
+</head>\
+<body>\
+  <div class="board">\
+    <header>\
+      <h1>Steal-a-Brain: Multiplication (up to 4\'d7)</h1>\
+      <div class="controls">\
+        <label>Players\
+          <select id="playerCount">\
+            <option value="2">2</option>\
+            <option value="3">3</option>\
+            <option value="4" selected>4</option>\
+          </select>\
+        </label>\
+        <label>Rounds\
+          <input id="roundCount" type="number" min="1" max="20" value="10" />\
+        </label>\
+        <button id="startBtn">Start Game</button>\
+      </div>\
+    </header>\
+\
+    <div class="game">\
+      <div class="left">\
+        <div class="question" id="questionCard">\
+          <div class="big" id="questionText">Press Start</div>\
+          <div class="hint" id="hintText">Problems use one factor 1\'964 and the other 1\'9612.</div>\
+\
+          <div class="answer-row" id="answerRow" style="display:none">\
+            <input id="answerInput" class="answer" inputmode="numeric" autocomplete="off" />\
+            <button id="submitBtn">Submit</button>\
+            <button id="passBtn" style="background:#e11d48;color:white">Pass</button>\
+          </div>\
+        </div>\
+\
+        <div style="display:flex; gap:8px; align-items:center; margin-bottom:10px">\
+          <div class="small">Current round: <strong id="roundDisplay">0</strong></div>\
+          <div class="small">/ <strong id="roundTotal">0</strong></div>\
+          <div style="flex:1"></div>\
+          <div class="small">Steal window: <span id="stealLabel">\'97</span></div>\
+        </div>\
+\
+        <div class="players" id="playersPane">\
+          <!-- players injected here -->\
+        </div>\
+      </div>\
+\
+      <div class="right">\
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px">\
+          <strong>Game Log</strong>\
+          <div><button id="clearLog" style="background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)">Clear</button></div>\
+        </div>\
+        <div class="log" id="log"></div>\
+\
+        <footer>\
+          <div class="small">Tip: If a player misses, next player may try to steal the point.</div>\
+          <div>\
+            <button id="newRoundBtn" style="background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--accent)">Next Question</button>\
+          </div>\
+        </footer>\
+      </div>\
+    </div>\
+  </div>\
+\
+<script>\
+(function()\{\
+  const playerCountSel = document.getElementById('playerCount');\
+  const roundCountIn = document.getElementById('roundCount');\
+  const startBtn = document.getElementById('startBtn');\
+  const playersPane = document.getElementById('playersPane');\
+  const questionText = document.getElementById('questionText');\
+  const hintText = document.getElementById('hintText');\
+  const answerRow = document.getElementById('answerRow');\
+  const answerInput = document.getElementById('answerInput');\
+  const submitBtn = document.getElementById('submitBtn');\
+  const passBtn = document.getElementById('passBtn');\
+  const logEl = document.getElementById('log');\
+  const clearLogBtn = document.getElementById('clearLog');\
+  const roundDisplay = document.getElementById('roundDisplay');\
+  const roundTotal = document.getElementById('roundTotal');\
+  const newRoundBtn = document.getElementById('newRoundBtn');\
+  const stealLabel = document.getElementById('stealLabel');\
+\
+  let state = \{\
+    players: [],\
+    currentIndex: 0,\
+    round: 0,\
+    totalRounds: 10,\
+    awaitingSteal: false,\
+    stealFromIndex: null,\
+    currentProblem: null\
+  \};\
+\
+  function log(msg)\{\
+    const time = new Date().toLocaleTimeString();\
+    const el = document.createElement('div');\
+    el.textContent = `[$\{time\}] $\{msg\}`;\
+    logEl.prepend(el);\
+  \}\
+\
+  function setupPlayers(n)\{\
+    state.players = [];\
+    playersPane.innerHTML = '';\
+    for(let i=0;i<n;i++)\{\
+      const p = \{ name: 'P' + (i+1), score: 0 \};\
+      state.players.push(p);\
+      const dom = document.createElement('div');\
+      dom.className = 'player';\
+      dom.id = 'player-'+i;\
+      dom.innerHTML = `<div class="badge">#$\{i+1\}</div>\
+                       <div class="name">$\{p.name\}</div>\
+                       <div class="score" id="score-$\{i\}">0</div>`;\
+      playersPane.appendChild(dom);\
+    \}\
+  \}\
+\
+  function updatePlayerUI()\{\
+    state.players.forEach((p,i)=>\{\
+      const el = document.getElementById('player-'+i);\
+      el.classList.toggle('active', i === state.currentIndex);\
+      document.getElementById('score-'+i).textContent = p.score;\
+    \});\
+  \}\
+\
+  function pickProblem()\{\
+    // one factor 1..4, other 1..12\
+    const a = Math.floor(Math.random()*4)+1; // 1..4\
+    const b = Math.floor(Math.random()*12)+1; //1..12\
+    return \{a,b,answer: a*b\};\
+  \}\
+\
+  function showProblem()\{\
+    state.currentProblem = pickProblem();\
+    questionText.textContent = `$\{state.currentProblem.a\} \'d7 $\{state.currentProblem.b\} = ?`;\
+    answerRow.style.display = 'flex';\
+    answerInput.value = '';\
+    answerInput.focus();\
+    stealLabel.textContent = 'No';\
+    state.awaitingSteal = false;\
+    state.stealFromIndex = null;\
+    log(`Question for $\{state.players[state.currentIndex].name\}: $\{state.currentProblem.a\} \'d7 $\{state.currentProblem.b\}`);\
+  \}\
+\
+  function startGame()\{\
+    const n = parseInt(playerCountSel.value,10);\
+    const rounds = parseInt(roundCountIn.value,10) || 10;\
+    state.totalRounds = rounds;\
+    roundTotal.textContent = rounds;\
+    setupPlayers(n);\
+    state.round = 0;\
+    state.currentIndex = 0;\
+    logEl.innerHTML = '';\
+    nextTurn();\
+  \}\
+\
+  function nextTurn()\{\
+    if(state.round >= state.totalRounds)\{\
+      endGame();\
+      return;\
+    \}\
+    // move to next player\
+    state.awaitingSteal = false;\
+    state.stealFromIndex = null;\
+    state.currentIndex = state.currentIndex % state.players.length;\
+    state.round++;\
+    roundDisplay.textContent = state.round;\
+    updatePlayerUI();\
+    showProblem();\
+  \}\
+\
+  function endGame()\{\
+    answerRow.style.display = 'none';\
+    // find winners\
+    const maxScore = Math.max(...state.players.map(p => p.score));\
+    const winners = state.players.map((p,i)=>(\{i,p\})).filter(x=>x.p.score===maxScore);\
+    if(winners.length===1)\{\
+      log(`\uc0\u55356 \u57225  $\{winners[0].p.name\} wins with $\{maxScore\} point(s)!`);\
+      questionText.textContent = `$\{winners[0].p.name\} wins! $\{maxScore\} pts`;\
+      document.getElementById('player-'+winners[0].i).classList.add('win');\
+    \} else \{\
+      const names = winners.map(w=>w.p.name).join(', ');\
+      log(`\uc0\u55358 \u56605  Tie between $\{names\} \'97 $\{maxScore\} point(s) each.`);\
+      questionText.textContent = `Tie: $\{names\} ($\{maxScore\})`;\
+      winners.forEach(w=>document.getElementById('player-'+w.i).classList.add('win'));\
+    \}\
+  \}\
+\
+  function handleSubmit()\{\
+    const val = answerInput.value.trim();\
+    if(val === '') return;\
+    const num = Number(val);\
+    const correct = num === state.currentProblem.answer;\
+    const cur = state.currentIndex;\
+    if(!state.awaitingSteal)\{\
+      // normal answer attempt\
+      if(correct)\{\
+        state.players[cur].score += 1;\
+        log(`$\{state.players[cur].name\} answered $\{num\} \'97 correct! +1`);\
+        updatePlayerUI();\
+        // proceed to next player + next round\
+        state.currentIndex = (state.currentIndex + 1) % state.players.length;\
+        setTimeout(()=> nextTurn(), 600);\
+      \} else \{\
+        log(`$\{state.players[cur].name\} answered $\{num\} \'97 incorrect.`);\
+        // allow steal: next player in order gets a chance\
+        state.awaitingSteal = true;\
+        state.stealFromIndex = (cur + 1) % state.players.length;\
+        stealLabel.textContent = `Open to $\{state.players[state.stealFromIndex].name\}`;\
+        questionText.textContent = `STEAL chance \'97 $\{state.players[state.stealFromIndex].name\}, $\{state.currentProblem.a\} \'d7 $\{state.currentProblem.b\} = ?`;\
+        answerInput.value = '';\
+        answerInput.focus();\
+        // note: currentIndex remains pointing to original player until steal resolved\
+      \}\
+    \} else \{\
+      // steal attempt by stealFromIndex\
+      const stealer = state.stealFromIndex;\
+      if(stealer !== state.currentIndex)\{\
+        // ensure currentIndex is set to stealer to type: force currentIndex to stealer for fairness\
+        state.currentIndex = stealer;\
+        updatePlayerUI();\
+      \}\
+      if(correct)\{\
+        state.players[stealer].score += 1;\
+        log(`$\{state.players[stealer].name\} stole it by answering $\{num\} \'97 correct! +1`);\
+        updatePlayerUI();\
+      \} else \{\
+        log(`$\{state.players[stealer].name\} attempted steal with $\{num\} \'97 incorrect. No points awarded.`);\
+      \}\
+      // after steal attempt, move currentIndex to the player after original (the next sequential turn)\
+      state.currentIndex = (state.stealFromIndex + 1) % state.players.length;\
+      state.awaitingSteal = false;\
+      state.stealFromIndex = null;\
+      stealLabel.textContent = 'No';\
+      setTimeout(()=> nextTurn(), 600);\
+    \}\
+  \}\
+\
+  // PASS: if current player passes, allow steal immediately to next player\
+  function handlePass()\{\
+    if(!state.currentProblem) return;\
+    const cur = state.currentIndex;\
+    log(`$\{state.players[cur].name\} passed.`);\
+    state.awaitingSteal = true;\
+    state.stealFromIndex = (cur + 1) % state.players.length;\
+    stealLabel.textContent = `Open to $\{state.players[state.stealFromIndex].name\}`;\
+    questionText.textContent = `STEAL chance \'97 $\{state.players[state.stealFromIndex].name\}, $\{state.currentProblem.a\} \'d7 $\{state.currentProblem.b\} = ?`;\
+    answerInput.value = '';\
+    answerInput.focus();\
+  \}\
+\
+  // UI events\
+  startBtn.addEventListener('click', startGame);\
+  submitBtn.addEventListener('click', handleSubmit);\
+  answerInput.addEventListener('keydown', function(e)\{\
+    if(e.key === 'Enter') handleSubmit();\
+  \});\
+  passBtn.addEventListener('click', handlePass);\
+  clearLogBtn.addEventListener('click', ()=> logEl.innerHTML = '');\
+  newRoundBtn.addEventListener('click', ()=> \{\
+    // skip to next question without awarding point (useful for demo)\
+    state.currentIndex = (state.currentIndex + 1) % state.players.length;\
+    nextTurn();\
+  \});\
+\
+  // init defaults\
+  roundTotal.textContent = roundCountIn.value;\
+  setupPlayers(4);\
+  updatePlayerUI();\
+\
+\})();\
+</script>\
+</body>\
+</html>\
+}
